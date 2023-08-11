@@ -1,0 +1,6 @@
+requests>=2.31.0
+pandas>=2.0.1
+geopandas>=0.13.2
+shapely>=2.0.1
+rtree>=1.0.1
+fiona>=1.9.4

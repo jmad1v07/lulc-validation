@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lulc-validation"
+version = "0.0.3"
+description = "LULC accuracy assessment with reference data generated via stratified sampling"
+readme = "README.md"
+authors = [{name = "John Duncan"}]
+license = { file = "LICESNE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "requests",  
+    "pandas",
+    "geopandas",
+    "shapely",
+    "rtree",
+    "fiona"
+]
+requires-python = ">=3.9"
+
+[tool.setuptools.packages.find]
+include = ["lulc_validation", "lulc_validation.*"]
