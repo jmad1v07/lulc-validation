@@ -14,6 +14,8 @@ pip install .
 
 ## Use
 
+A sample dataset is provided in this repo at `data/samples.csv`. This is based on Table. 2 in [Stehman (2014)](https://www.tandfonline.com/doi/abs/10.1080/01431161.2014.930207).
+
 Initialise a `StratVal` object:
 
 ```
@@ -48,3 +50,10 @@ print(f"producer's accuracy: {strat_val.producers_accuracy()}")
 
 ## Development
 
+pytest is used for testing and tests are based on replicating calculations in the worked example of *3. Numerical examples* in [Stehman (2014)](https://www.tandfonline.com/doi/abs/10.1080/01431161.2014.930207).
+
+To run the tests:
+
+```
+pytest
+``` 
