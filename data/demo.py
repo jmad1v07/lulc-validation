@@ -9,7 +9,7 @@ strat_val = StratVal(
     class_list=[1, 2, 3, 4],
     n_strata=[40000, 30000, 20000, 10000],
     samples_df=df,
-    strata_col="stratum",
+    strata_col="strata",
     ref_class="ref_class",
     map_class="map_class"
 )
@@ -17,3 +17,4 @@ strat_val = StratVal(
 print(f"accuracy: {strat_val.accuracy()}")
 print(f"user's accuracy: {strat_val.users_accuracy()}")
 print(f"producer's accuracy: {strat_val.producers_accuracy()}")
+print(f"accuracy se: {strat_val.accuracy_se()}")

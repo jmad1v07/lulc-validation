@@ -1,4 +1,5 @@
 import pandas as pd
+import math
 
 
 class StratVal:
@@ -62,7 +63,7 @@ class StratVal:
         return samples_strata_count
 
     def users_accuracy(self):
-        """Compute user's accuracy account for reference data generated via stratified sampling."""
+        """Compute user's accuracy accounting for reference data generated via stratified sampling."""
         n_df = self._n_samples_per_strata()
         self.samples_df["oa_indicator"] = (
             self.samples_df[self.ref_class] == self.samples_df[self.map_class]
@@ -146,7 +147,7 @@ class StratVal:
         return producers_accuracy
 
     def accuracy(self):
-        """Compute overall accuracy account for reference data generated via stratified sampling."""
+        """Compute overall accuracy accounting for reference data generated via stratified sampling."""
         numerator = 0
         denominator = 0
         c_df = self._correct_classification_indicator()
@@ -163,3 +164,47 @@ class StratVal:
             denominator += N_h
 
         return numerator / denominator
+
+    def accuracy_se(self):
+        """Compute standard errors for overall accuracy."""
+        c_df = self._correct_classification_indicator()
+        n_df = self._n_samples_per_strata()
+        u_df = pd.merge(c_df, n_df, on=self.strata_col, how="inner")
+        self.samples_df["oa_indicator"] = (
+            self.samples_df[self.ref_class] == self.samples_df[self.map_class]
+        ) * 1
+
+        N = sum(self.n_strata)
+        N_sq = N * N
+
+        h_tmp = 0
+        for i, h in enumerate(self.strata_list):
+            N_h = self.n_strata[i]
+            N_h_sq = N_h * N_h
+            n_h_samples = n_df.loc[n_df[self.strata_col] == h, :].iloc[0, 1]
+
+            y_u = u_df.loc[u_df[self.strata_col] == h, :]
+            y_u = y_u["oa_indicator"] / y_u[self.strata_col + "_n"]
+            y_df = self.samples_df.loc[self.samples_df[self.strata_col] == h, :]
+
+            # Eq 26 of Stehman (2014)
+            y_u_y_h_diff_sq = (y_df["oa_indicator"] - y_u.iloc[0]) * (y_df["oa_indicator"] - y_u.iloc[0])
+            numerator_tmp = sum(y_u_y_h_diff_sq)
+            denominator_tmp = (n_h_samples - 1)
+            s_2_yh = numerator_tmp / denominator_tmp 
+
+            # SE for overall accuracy worked example
+            numerator = (1 - n_h_samples / N_h) * s_2_yh
+            denominator = n_h_samples
+            tmp_h = N_h_sq * (numerator / denominator)
+            h_tmp += tmp_h
+        
+        SE_y = (1/N_sq) * h_tmp
+
+        return math.sqrt(SE_y)
+
+
+
+
+            
+
