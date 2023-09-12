@@ -39,11 +39,11 @@ class StratVal:
         self.strata_col = strata_col
         self.ref_class = ref_class
         self.map_class = map_class
-
-    def _correct_classification_indicator(self):
         self.samples_df["oa_indicator"] = (
             self.samples_df[self.ref_class] == self.samples_df[self.map_class]
         ) * 1
+
+    def _correct_classification_indicator(self):
         correct_classified_by_strata = (
             self.samples_df.groupby([self.strata_col])[["oa_indicator"]]
             .sum()
@@ -65,9 +65,6 @@ class StratVal:
     def users_accuracy(self):
         """Compute user's accuracy accounting for reference data generated via stratified sampling."""
         n_df = self._n_samples_per_strata()
-        self.samples_df["oa_indicator"] = (
-            self.samples_df[self.ref_class] == self.samples_df[self.map_class]
-        ) * 1
 
         users_accuracy = {}
 
@@ -76,26 +73,32 @@ class StratVal:
             denominator = 0
 
             for i, h in enumerate(self.strata_list):
+                # total N for the strata
                 N_h = self.n_strata[i]
+
+                # sampled n from N in strata
                 n_h_samples = n_df.loc[n_df[self.strata_col] == h, :].iloc[0, 1]
+
+                # df for the strata
                 y_df = self.samples_df.loc[self.samples_df[self.strata_col] == h, :]
 
-                y_h_num = y_df.loc[
+                # equation 27 of Stehman (2014)
+                y_hat_num = y_df.loc[
                     (y_df["oa_indicator"] == 1) & (y_df[self.map_class] == c), :
                 ].shape[0]
-                if y_h_num == 0:
-                    y_h_num = 0
+                if y_hat_num == 0:
+                    y_hat_num = 0
                 else:
-                    y_h_num = y_h_num / n_h_samples
+                    y_hat_num = y_hat_num / n_h_samples
 
-                x_h_denom = y_df.loc[(y_df[self.map_class] == c), :].shape[0]
-                if x_h_denom == 0:
-                    x_h_denom = 0
+                x_hat_denom = y_df.loc[(y_df[self.map_class] == c), :].shape[0]
+                if x_hat_denom == 0:
+                    x_hat_denom = 0
                 else:
-                    x_h_denom = x_h_denom / n_h_samples
+                    x_hat_denom = x_hat_denom / n_h_samples
 
-                numerator += N_h * y_h_num
-                denominator += N_h * x_h_denom
+                numerator += N_h * y_hat_num
+                denominator += N_h * x_hat_denom
 
             if denominator == 0:
                 users_accuracy[str(c)] = 0
@@ -107,9 +110,6 @@ class StratVal:
     def producers_accuracy(self):
         """Compute producer's accuracy account for reference data generated via stratified sampling."""
         n_df = self._n_samples_per_strata()
-        self.samples_df["oa_indicator"] = (
-            self.samples_df[self.ref_class] == self.samples_df[self.map_class]
-        ) * 1
 
         producers_accuracy = {}
 
@@ -118,26 +118,32 @@ class StratVal:
             denominator = 0
 
             for i, h in enumerate(self.strata_list):
+                # total N for the strata
                 N_h = self.n_strata[i]
+
+                # sampled n from N in strata
                 n_h_samples = n_df.loc[n_df[self.strata_col] == h, :].iloc[0, 1]
+
+                # df for the strata
                 y_df = self.samples_df.loc[self.samples_df[self.strata_col] == h, :]
 
-                y_h_num = y_df.loc[
-                    (y_df["oa_indicator"] == 1) & (y_df[self.map_class] == c), :
+                # equation 27 of Stehman (2014)
+                y_hat_num = y_df.loc[
+                    (y_df["oa_indicator"] == 1) & (y_df[self.ref_class] == c), :
                 ].shape[0]
-                if y_h_num == 0:
-                    y_h_num = 0
+                if y_hat_num == 0:
+                    y_hat_num = 0
                 else:
-                    y_h_num = y_h_num / n_h_samples
+                    y_hat_num = y_hat_num / n_h_samples
 
-                x_h_denom = y_df.loc[(y_df[self.ref_class] == c), :].shape[0]
-                if x_h_denom == 0:
-                    x_h_denom = 0
+                x_hat_denom = y_df.loc[(y_df[self.ref_class] == c), :].shape[0]
+                if x_hat_denom == 0:
+                    x_hat_denom = 0
                 else:
-                    x_h_denom = x_h_denom / n_h_samples
+                    x_hat_denom = x_hat_denom / n_h_samples
 
-                numerator += N_h * y_h_num
-                denominator += N_h * x_h_denom
+                numerator += N_h * y_hat_num
+                denominator += N_h * x_hat_denom
 
             if denominator == 0:
                 producers_accuracy[str(c)] = 0
@@ -170,24 +176,25 @@ class StratVal:
         c_df = self._correct_classification_indicator()
         n_df = self._n_samples_per_strata()
         u_df = pd.merge(c_df, n_df, on=self.strata_col, how="inner")
-        self.samples_df["oa_indicator"] = (
-            self.samples_df[self.ref_class] == self.samples_df[self.map_class]
-        ) * 1
 
         N = sum(self.n_strata)
         N_sq = N * N
 
         h_tmp = 0
         for i, h in enumerate(self.strata_list):
+            # total N for the strata
             N_h = self.n_strata[i]
+
             N_h_sq = N_h * N_h
+
+            # sampled n from N in strata
             n_h_samples = n_df.loc[n_df[self.strata_col] == h, :].iloc[0, 1]
 
             y_u = u_df.loc[u_df[self.strata_col] == h, :]
             y_u = y_u["oa_indicator"] / y_u[self.strata_col + "_n"]
             y_df = self.samples_df.loc[self.samples_df[self.strata_col] == h, :]
 
-            # Eq 26 of Stehman (2014)
+            # equation 26 of Stehman (2014)
             y_u_y_h_diff_sq = (y_df["oa_indicator"] - y_u.iloc[0]) * (y_df["oa_indicator"] - y_u.iloc[0])
             numerator_tmp = sum(y_u_y_h_diff_sq)
             denominator_tmp = (n_h_samples - 1)
@@ -202,7 +209,133 @@ class StratVal:
         SE_y = (1/N_sq) * h_tmp
 
         return math.sqrt(SE_y)
+    
+    def users_accuracy_se(self):
+        """Compute standard errors for User's accuracy"""
+        n_df = self._n_samples_per_strata()
 
+        N = sum(self.n_strata)
+
+        users_acc = self.users_accuracy()
+        users_accuracy_se = {}
+
+        for c in self.class_list:
+            R = users_acc[str(c)]
+            h_tmp = 0
+            x_tmp = 0
+            for i, h in enumerate(self.strata_list):
+                N_h = self.n_strata[i]
+
+                N_h_sq = N_h * N_h
+
+                n_h_samples = n_df.loc[n_df[self.strata_col] == h, :].iloc[0, 1]
+
+                y_df = self.samples_df.loc[self.samples_df[self.strata_col] == h, :].copy()
+
+                # X indicator function for user's accuracy
+                y_df.loc[:, "x_indicator"] = (y_df[self.map_class] == c) * 1
+                y_df.loc[:, "y_u_indicator"] = (y_df["oa_indicator"] == 1) & (y_df[self.map_class] == c) * 1
+
+                # s^2_{yh} - equation 26
+                y_hat_h = y_df.loc[
+                    (y_df["oa_indicator"] == 1) & (y_df[self.map_class] == c), :
+                ].shape[0]
+                if y_hat_h == 0:
+                    y_hat_h = 0
+                else:
+                    y_hat_h = y_hat_h / n_h_samples
+                
+                y_u_y_h_diff_sq = (y_df["y_u_indicator"] - y_hat_h) * (y_df["y_u_indicator"] - y_hat_h) /  (n_h_samples - 1)
+                s_2_yh = sum(y_u_y_h_diff_sq)
+
+                # s^2_{xh} - equation 26
+                x_hat_h = y_df.loc[(y_df[self.map_class] == c), :].shape[0]
+                if x_hat_h == 0:
+                    x_hat_h = 0
+                else:
+                    x_hat_h = x_hat_h / n_h_samples
+
+                x_u_x_h_diff_sq = (y_df["x_indicator"] - x_hat_h) * (y_df["x_indicator"] - x_hat_h) / (n_h_samples - 1)
+                s_2_xh = sum(x_u_x_h_diff_sq)
+                
+                # s_{xyh} - equation 29
+                s_xyh = sum(((y_df["y_u_indicator"] - y_hat_h) * (y_df["x_indicator"] - x_hat_h)) / (n_h_samples - 1))
+
+                # equation 28 of Stehman (2014)
+                tmp_h = N_h_sq * (1 - n_h_samples / N_h) * (s_2_yh + ((R * R) * s_2_xh) - (2 * R * s_xyh))
+                h_tmp += (tmp_h / n_h_samples)
+                
+                x_tmp += N_h * x_hat_h
+            
+            X_sq = x_tmp * x_tmp
+
+            users_accuracy_se[str(c)] = math.sqrt((1 / X_sq) * h_tmp)
+        
+        return users_accuracy_se
+
+    def producers_accuracy_se(self):
+        """Compute standard errors for Producer's accuracy"""
+        n_df = self._n_samples_per_strata()
+
+        N = sum(self.n_strata)
+
+        producers_acc = self.producers_accuracy()
+        producers_accuracy_se = {}
+
+        for c in self.class_list:
+            R = producers_acc[str(c)]
+            h_tmp = 0
+            x_tmp = 0
+            for i, h in enumerate(self.strata_list):
+                N_h = self.n_strata[i]
+
+                N_h_sq = N_h * N_h
+
+                n_h_samples = n_df.loc[n_df[self.strata_col] == h, :].iloc[0, 1]
+
+                y_df = self.samples_df.loc[self.samples_df[self.strata_col] == h, :].copy()
+
+                # X indicator function for user's accuracy
+                y_df.loc[:, "x_indicator"] = (y_df[self.ref_class] == c) * 1
+                y_df.loc[:, "y_u_indicator"] = (y_df["oa_indicator"] == 1) & (y_df[self.ref_class] == c) * 1
+
+                # s^2_{yh} - equation 26
+                y_hat_h = y_df.loc[
+                    (y_df["oa_indicator"] == 1) & (y_df[self.ref_class] == c), :
+                ].shape[0]
+                if y_hat_h == 0:
+                    y_hat_h = 0
+                else:
+                    y_hat_h = y_hat_h / n_h_samples
+                
+                y_u_y_h_diff_sq = (y_df["y_u_indicator"] - y_hat_h) * (y_df["y_u_indicator"] - y_hat_h) /  (n_h_samples - 1)
+                s_2_yh = sum(y_u_y_h_diff_sq)
+
+                # s^2_{xh} - equation 26
+                x_hat_h = y_df.loc[(y_df[self.ref_class] == c), :].shape[0]
+
+                if x_hat_h == 0:
+                    x_hat_h = 0
+                else:
+                    x_hat_h = x_hat_h / n_h_samples
+
+                x_u_x_h_diff_sq = (y_df["x_indicator"] - x_hat_h) * (y_df["x_indicator"] - x_hat_h) / (n_h_samples - 1)
+                s_2_xh = sum(x_u_x_h_diff_sq)   
+                
+                # s_{xyh} - equation 29
+                s_xyh = sum(((y_df["y_u_indicator"] - y_hat_h) * (y_df["x_indicator"] - x_hat_h)) / (n_h_samples - 1))
+
+                # equation 28 of Stehman (2014)
+                tmp_h = N_h_sq * (1 - n_h_samples / N_h) * (s_2_yh + ((R * R) * s_2_xh) - (2 * R * s_xyh))
+                h_tmp += (tmp_h / n_h_samples)
+                
+                x_tmp += N_h * x_hat_h
+            
+            X_sq = x_tmp * x_tmp
+
+            producers_accuracy_se[str(c)] = math.sqrt((1 / X_sq) * h_tmp)
+        
+        return producers_accuracy_se
 
 
 

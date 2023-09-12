@@ -42,6 +42,14 @@ strat_val = StratVal(
 )
 
 print(f"accuracy: {strat_val.accuracy()}")
+print("")
 print(f"user's accuracy: {strat_val.users_accuracy()}")
+print("")
 print(f"producer's accuracy: {strat_val.producers_accuracy()}")
+print("")
+print(f"accuracy se: {strat_val.accuracy_se()}")
+print("")
+print(f"user's accuracy se: {strat_val.users_accuracy_se()}")
+print("")
+print(f"producer's accuracy se: {strat_val.producers_accuracy_se()}")
 

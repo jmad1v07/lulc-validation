@@ -9,3 +9,5 @@ mkdocs-material==9.1.19
 pre-commit==3.3.3
 build==0.10.0
 twine==4.0.2
+matplotlib==3.7.3
+seaborn==0.12.2
