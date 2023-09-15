@@ -12,6 +12,12 @@ Clone this repo, then pip install locally.
 pip install .
 ```
 
+or from PyPi.
+
+```
+pip install lulc-validation
+```
+
 ## Use
 
 A sample dataset is provided in this repo at `data/samples.csv`. This is based on Table. 2 in [Stehman (2014)](https://www.tandfonline.com/doi/abs/10.1080/01431161.2014.930207).
