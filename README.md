@@ -36,16 +36,22 @@ strat_val = StratVal(
 )
 ```
 
-A `StratVal` object has three methods:
+A `StratVal` object has the following methods:
 
 * `accuracy()`: returns a float type number representing the overall accuracy of the LULC map accounting for the stratified sampling design of the reference data. This implementation is based on the worked example of *3. Numerical examples* in [Stehman (2014)](https://www.tandfonline.com/doi/abs/10.1080/01431161.2014.930207).
 * `users_accuracy()`: returns a dict object where keys indicate the map class and values represent user's accuracy for the corresponding class accounting for the stratified sampling design of the reference data. This implementation is based on the worked example of *3. Numerical examples* in [Stehman (2014)](https://www.tandfonline.com/doi/abs/10.1080/01431161.2014.930207).
 * `producers_accuracy()`: returns a dict object where keys indicate the map class and values represent producer's accuracy for the corresponding class accounting for the stratified sampling design of the reference data. This implementation is based on the worked example of *3. Numerical examples* in [Stehman (2014)](https://www.tandfonline.com/doi/abs/10.1080/01431161.2014.930207).
+* `accuracy_se()`: returns the standard error of the estimate of the overall accuracy of the LULC map accounting for the stratified sampling design of the reference data. This implementation is based on the worked example of *3. Numerical examples* in [Stehman (2014)](https://www.tandfonline.com/doi/abs/10.1080/01431161.2014.930207).
+* `users_accuracy_se()`: returns a dict object where keys indicate the map class and values represent standard errors of the estimates of the user's accuracy for the corresponding class accounting for the stratified sampling design of the reference data. This implementation is based on the worked example of *3. Numerical examples* in [Stehman (2014)](https://www.tandfonline.com/doi/abs/10.1080/01431161.2014.930207).
+* `producers_accuracy_se()`: returns a dict object where keys indicate the map class and values represent standard errors of the estimates of the producer's accuracy for the corresponding class accounting for the stratified sampling design of the reference data. This implementation is based on the worked example of *3. Numerical examples* in [Stehman (2014)](https://www.tandfonline.com/doi/abs/10.1080/01431161.2014.930207).
 
 ```
 print(f"accuracy: {strat_val.accuracy()}")
 print(f"user's accuracy: {strat_val.users_accuracy()}")
 print(f"producer's accuracy: {strat_val.producers_accuracy()}")
+print(f"accuracy se: {strat_val.accuracy_se()}")
+print(f"user's accuracy se: {strat_val.users_accuracy_se()}")
+print(f"producers's accuracy se: {strat_val.producers_accuracy_se()}")
 ```
 
 ## Development
